@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Users, Book, Heart, ArrowRight } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import masonicHeroImg from '@/assets/masonic-hero.jpg';
 import charityWorkImg from '@/assets/charity-work.jpg';
 import educationImg from '@/assets/education.jpg';
@@ -18,41 +19,51 @@ const Index = () => {
     values: 'Honestidade, Fraternidade, Tolerância e Busca pela Verdade'
   });
 
-  const featuredActivities = [
-    {
-      id: '1',
-      title: 'Campanha de Arrecadação de Alimentos',
-      description: 'Beneficiando mais de 200 famílias carentes da região',
-      category: 'Beneficência',
-      image_url: charityWorkImg,
-      event_date: '2024-01-15'
-    },
-    {
-      id: '2',
-      title: 'Palestra Pública: História da Maçonaria',
-      description: 'Evento educativo aberto ao público',
-      category: 'Educação', 
-      image_url: educationImg,
-      event_date: '2024-02-20'
-    }
-  ];
+  const [featuredActivities, setFeaturedActivities] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const upcomingEvents = [
-    {
-      id: '1',
-      title: 'Sessão Magna de Posse',
-      event_date: '2024-03-15T19:00:00',
-      location: 'Templo da Loja',
-      is_public: false
-    },
-    {
-      id: '2', 
-      title: 'Palestra Pública: Valores Maçônicos',
-      event_date: '2024-03-25T20:00:00',
-      location: 'Auditório Municipal',
-      is_public: true
-    }
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Buscar atividades em destaque
+        const { data: activities, error: activitiesError } = await supabase
+          .from('activities')
+          .select('*')
+          .eq('is_featured', true)
+          .eq('is_public', true)
+          .order('event_date', { ascending: false })
+          .limit(2);
+
+        if (activitiesError) {
+          console.error('Erro ao buscar atividades:', activitiesError);
+        } else {
+          setFeaturedActivities(activities || []);
+        }
+
+        // Buscar próximos eventos
+        const { data: events, error: eventsError } = await supabase
+          .from('events')
+          .select('*')
+          .eq('is_public', true)
+          .gte('event_date', new Date().toISOString())
+          .order('event_date', { ascending: true })
+          .limit(2);
+
+        if (eventsError) {
+          console.error('Erro ao buscar eventos:', eventsError);
+        } else {
+          setUpcomingEvents(events || []);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
@@ -169,30 +180,44 @@ const Index = () => {
           </div>
           
           <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {featuredActivities.map((activity) => (
-              <Card key={activity.id} className="overflow-hidden hover:shadow-glow transition-all duration-300">
-                <div className="aspect-video overflow-hidden">
-                  <img 
-                    src={activity.image_url} 
-                    alt={activity.title}
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                  />
-                </div>
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge variant="secondary" className="bg-masonic-light/10 text-masonic-dark">
-                      {activity.category}
-                    </Badge>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <CalendarDays className="h-4 w-4 mr-1" />
-                      {formatDate(activity.event_date)}
+            {loading ? (
+              <div className="col-span-2 text-center py-8">
+                <p className="text-muted-foreground">Carregando atividades...</p>
+              </div>
+            ) : featuredActivities.length > 0 ? (
+              featuredActivities.map((activity) => (
+                <Card key={activity.id} className="overflow-hidden hover:shadow-glow transition-all duration-300">
+                  {activity.image_url && (
+                    <div className="aspect-video overflow-hidden">
+                      <img 
+                        src={activity.image_url} 
+                        alt={activity.title}
+                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                      />
                     </div>
-                  </div>
-                  <CardTitle className="text-masonic-dark">{activity.title}</CardTitle>
-                  <CardDescription>{activity.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
+                  )}
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="secondary" className="bg-masonic-light/10 text-masonic-dark">
+                        {activity.category}
+                      </Badge>
+                      {activity.event_date && (
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <CalendarDays className="h-4 w-4 mr-1" />
+                          {formatDate(activity.event_date)}
+                        </div>
+                      )}
+                    </div>
+                    <CardTitle className="text-masonic-dark">{activity.title}</CardTitle>
+                    <CardDescription>{activity.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-8">
+                <p className="text-muted-foreground">Nenhuma atividade em destaque encontrada.</p>
+              </div>
+            )}
           </div>
           
           <div className="text-center">
@@ -217,25 +242,35 @@ const Index = () => {
           </div>
           
           <div className="grid md:grid-cols-2 gap-6 mb-12">
-            {upcomingEvents.map((event) => (
-              <Card key={event.id} className="hover:shadow-glow transition-all duration-300">
-                <CardHeader>
-                  <div className="flex items-center justify-between mb-2">
-                    {event.is_public && (
-                      <Badge className="bg-masonic-gold text-masonic-dark">
-                        Público
-                      </Badge>
-                    )}
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <CalendarDays className="h-4 w-4 mr-1" />
-                      {formatDateTime(event.event_date)}
+            {loading ? (
+              <div className="col-span-2 text-center py-8">
+                <p className="text-muted-foreground">Carregando eventos...</p>
+              </div>
+            ) : upcomingEvents.length > 0 ? (
+              upcomingEvents.map((event) => (
+                <Card key={event.id} className="hover:shadow-glow transition-all duration-300">
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      {event.is_public && (
+                        <Badge className="bg-masonic-gold text-masonic-dark">
+                          Público
+                        </Badge>
+                      )}
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <CalendarDays className="h-4 w-4 mr-1" />
+                        {formatDateTime(event.event_date)}
+                      </div>
                     </div>
-                  </div>
-                  <CardTitle className="text-masonic-dark">{event.title}</CardTitle>
-                  <CardDescription>{event.location}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
+                    <CardTitle className="text-masonic-dark">{event.title}</CardTitle>
+                    <CardDescription>{event.location}</CardDescription>
+                  </CardHeader>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-2 text-center py-8">
+                <p className="text-muted-foreground">Nenhum evento próximo encontrado.</p>
+              </div>
+            )}
           </div>
           
           <div className="text-center">
