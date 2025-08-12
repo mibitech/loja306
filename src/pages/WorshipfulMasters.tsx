@@ -1,12 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Crown, Calendar, Award, Users } from 'lucide-react';
-import { toast } from 'sonner';
+import { Crown, Calendar, Trophy, User } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface WorshipfulMaster {
   id: string;
@@ -22,15 +21,16 @@ interface WorshipfulMaster {
 }
 
 export default function WorshipfulMasters() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [masters, setMasters] = useState<WorshipfulMaster[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading && user) {
-      fetchWorshipfulMasters();
-    }
-  }, [user, loading]);
+    if (!user) return;
+    
+    fetchWorshipfulMasters();
+  }, [user]);
 
   const fetchWorshipfulMasters = async () => {
     try {
@@ -40,184 +40,220 @@ export default function WorshipfulMasters() {
         .order('sort_order', { ascending: true });
 
       if (error) throw error;
+      
       setMasters(data || []);
-    } catch (error) {
-      console.error('Error fetching worshipful masters:', error);
-      toast.error('Erro ao carregar dados dos Veneráveis');
+    } catch (error: any) {
+      toast({
+        title: "Erro ao carregar dados",
+        description: "Não foi possível carregar o quadro de veneráveis.",
+        variant: "destructive",
+      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  if (loading) {
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .filter(word => word.length > 2) // Skip small words like "da", "de", etc.
+      .slice(0, 2)
+      .map(word => word[0])
+      .join('')
+      .toUpperCase();
+  };
+
+  const formatDateRange = (startDate?: string, endDate?: string, year?: number) => {
+    if (startDate && endDate) {
+      return `${new Date(startDate).toLocaleDateString('pt-BR')} - ${new Date(endDate).toLocaleDateString('pt-BR')}`;
+    }
+    return year ? `${year}` : '';
+  };
+
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center space-y-4 p-6">
+            <User className="h-12 w-12 text-muted-foreground" />
+            <p className="text-center text-muted-foreground">
+              Acesso restrito. Faça login para visualizar o conteúdo.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  const currentMaster = masters.find(master => master.is_active);
-  const formerMasters = masters.filter(master => !master.is_active);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/50 to-primary/5">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Crown className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-              Quadro de Veneráveis
-            </h1>
-            <Crown className="h-8 w-8 text-primary" />
+  if (loading) {
+    return (
+      <div className="min-h-screen p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8">
+            <div className="h-8 bg-muted rounded w-64 mx-auto mb-4 animate-pulse"></div>
+            <div className="h-4 bg-muted rounded w-96 mx-auto animate-pulse"></div>
           </div>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Galeria dos Veneráveis Mestres que conduziram nossa Augusta e Respeitável Loja ao longo dos anos
-          </p>
-        </div>
-
-        {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
               <Card key={i} className="animate-pulse">
-                <CardHeader className="text-center pb-4">
-                  <div className="w-32 h-32 bg-muted rounded-full mx-auto mb-4"></div>
-                  <div className="h-6 bg-muted rounded w-3/4 mx-auto mb-2"></div>
-                  <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
-                </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-4 mb-4">
+                    <div className="w-16 h-16 bg-muted rounded-full"></div>
+                    <div className="flex-1">
+                      <div className="h-4 bg-muted rounded mb-2"></div>
+                      <div className="h-3 bg-muted rounded w-20"></div>
+                    </div>
+                  </div>
                   <div className="space-y-2">
-                    <div className="h-4 bg-muted rounded"></div>
-                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                    <div className="h-3 bg-muted rounded"></div>
+                    <div className="h-3 bg-muted rounded w-3/4"></div>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-        ) : (
-          <div className="space-y-12">
-            {/* Current Worshipful Master */}
-            {currentMaster && (
-              <div className="mb-16">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-primary mb-2">Venerável Mestre Atual</h2>
-                  <div className="w-24 h-1 bg-gradient-to-r from-primary to-primary-glow mx-auto rounded-full"></div>
-                </div>
-                
-                <Card className="max-w-2xl mx-auto border-primary/20 shadow-elegant">
-                  <CardHeader className="text-center pb-6">
-                    <div className="relative mx-auto mb-6">
-                      <Avatar className="w-40 h-40 border-4 border-primary/20">
-                        <AvatarImage src={currentMaster.photo_url} alt={currentMaster.name} />
-                        <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/10 to-primary/5">
-                          {currentMaster.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <Badge className="absolute -top-2 -right-2 bg-primary text-white px-3 py-1">
-                        <Crown className="w-4 h-4 mr-1" />
-                        Atual
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-2xl font-bold text-foreground mb-2">
-                      {currentMaster.name}
-                    </CardTitle>
-                    <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                      <Calendar className="w-4 h-4" />
-                      <span>Ano de Instalação: {currentMaster.installation_year}</span>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {currentMaster.bio && (
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          Biografia
-                        </h4>
-                        <p className="text-muted-foreground">{currentMaster.bio}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const currentMaster = masters.find(master => master.is_active);
+  const pastMasters = masters.filter(master => !master.is_active);
+
+  return (
+    <div className="min-h-screen p-6 bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center mb-4">
+            <Crown className="h-8 w-8 text-primary mr-3" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Quadro de Veneráveis
+            </h1>
+          </div>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Conheça os Veneráveis Mestres que conduziram nossa loja ao longo dos anos, 
+            preservando e transmitindo a sabedoria maçônica.
+          </p>
+        </div>
+
+        {/* Current Master */}
+        {currentMaster && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-semibold mb-6 flex items-center">
+              <Trophy className="h-6 w-6 text-primary mr-2" />
+              Venerável Mestre Atual
+            </h2>
+            <Card className="border-primary/20 shadow-lg bg-gradient-to-br from-card to-primary/5">
+              <CardContent className="p-8">
+                <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
+                  <div className="flex-shrink-0">
+                    <Avatar className="h-32 w-32 border-4 border-primary/20">
+                      <AvatarImage src={currentMaster.photo_url} alt={currentMaster.name} />
+                      <AvatarFallback className="text-2xl font-semibold bg-primary/10 text-primary">
+                        {getInitials(currentMaster.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="flex-1 text-center lg:text-left">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-4">
+                      <h3 className="text-2xl font-bold text-foreground mb-2 lg:mb-0">
+                        {currentMaster.name}
+                      </h3>
+                      <div className="flex flex-wrap gap-2 justify-center lg:justify-end">
+                        <Badge variant="default" className="bg-primary text-primary-foreground">
+                          <Crown className="h-3 w-3 mr-1" />
+                          Venerável Atual
+                        </Badge>
+                        <Badge variant="outline" className="border-primary text-primary">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {currentMaster.installation_year}
+                        </Badge>
                       </div>
+                    </div>
+                    {currentMaster.bio && (
+                      <p className="text-muted-foreground mb-4 leading-relaxed">
+                        {currentMaster.bio}
+                      </p>
                     )}
                     {currentMaster.achievements && (
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-                          <Award className="w-4 h-4" />
+                      <div className="bg-muted/50 rounded-lg p-4">
+                        <h4 className="font-semibold text-sm uppercase tracking-wide text-primary mb-2">
                           Principais Realizações
                         </h4>
-                        <p className="text-muted-foreground">{currentMaster.achievements}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {currentMaster.achievements}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Past Masters */}
+        {pastMasters.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-6 flex items-center">
+              <Calendar className="h-6 w-6 text-primary mr-2" />
+              Ex-Veneráveis Mestres
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pastMasters.map((master) => (
+                <Card key={master.id} className="group hover:shadow-lg transition-all duration-300 hover:border-primary/30">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center space-x-4">
+                      <Avatar className="h-16 w-16 border-2 border-muted group-hover:border-primary/30 transition-colors">
+                        <AvatarImage src={master.photo_url} alt={master.name} />
+                        <AvatarFallback className="text-lg font-semibold bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                          {getInitials(master.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">
+                          {master.name}
+                        </CardTitle>
+                        <div className="flex items-center mt-1">
+                          <Calendar className="h-3 w-3 text-muted-foreground mr-1" />
+                          <span className="text-sm text-muted-foreground">
+                            {formatDateRange(master.term_start_date, master.term_end_date, master.installation_year)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    {master.bio && (
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
+                        {master.bio}
+                      </p>
+                    )}
+                    {master.achievements && (
+                      <div className="bg-muted/30 rounded-md p-3">
+                        <h4 className="text-xs font-semibold text-primary mb-1 uppercase tracking-wide">
+                          Realizações
+                        </h4>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {master.achievements}
+                        </p>
                       </div>
                     )}
                   </CardContent>
                 </Card>
-              </div>
-            )}
-
-            {/* Former Worshipful Masters */}
-            {formerMasters.length > 0 && (
-              <div>
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-foreground mb-2">Ex-Veneráveis Mestres</h2>
-                  <div className="w-24 h-1 bg-gradient-to-r from-muted-foreground to-muted mx-auto rounded-full"></div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {formerMasters.map((master) => (
-                    <Card key={master.id} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-muted">
-                      <CardHeader className="text-center pb-4">
-                        <Avatar className="w-32 h-32 mx-auto mb-4 border-2 border-muted">
-                          <AvatarImage src={master.photo_url} alt={master.name} />
-                          <AvatarFallback className="text-xl bg-gradient-to-br from-muted/10 to-muted/5">
-                            {master.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <CardTitle className="text-xl font-bold text-foreground mb-2">
-                          {master.name}
-                        </CardTitle>
-                        <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
-                          <span className="text-sm">{master.installation_year}</span>
-                        </div>
-                        {master.term_start_date && master.term_end_date && (
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(master.term_start_date).toLocaleDateString('pt-BR')} - {new Date(master.term_end_date).toLocaleDateString('pt-BR')}
-                          </p>
-                        )}
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        {master.bio && (
-                          <div>
-                            <h4 className="font-semibold text-sm text-foreground mb-1">Biografia</h4>
-                            <p className="text-sm text-muted-foreground line-clamp-3">{master.bio}</p>
-                          </div>
-                        )}
-                        {master.achievements && (
-                          <div>
-                            <h4 className="font-semibold text-sm text-foreground mb-1 flex items-center gap-1">
-                              <Award className="w-3 h-3" />
-                              Realizações
-                            </h4>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{master.achievements}</p>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         )}
 
-        {!isLoading && masters.length === 0 && (
-          <Card className="max-w-md mx-auto">
-            <CardContent className="text-center py-12">
-              <Crown className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">Nenhum Venerável Cadastrado</h3>
+        {masters.length === 0 && !loading && (
+          <Card className="text-center py-12">
+            <CardContent>
+              <Crown className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Nenhum Venerável Cadastrado</h3>
               <p className="text-muted-foreground">
-                Os dados dos Veneráveis Mestres ainda não foram cadastrados no sistema.
+                O quadro de veneráveis ainda não foi preenchido.
               </p>
             </CardContent>
           </Card>
