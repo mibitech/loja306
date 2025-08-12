@@ -33,12 +33,12 @@ export const Navigation: React.FC = () => {
     { href: '/about', label: 'Sobre Nós' },
     { href: '/activities', label: 'Atividades' },
     { href: '/events', label: 'Eventos' },
-    { href: '/education', label: 'Educação' },
     { href: '/contact', label: 'Contato' },
   ];
 
   const memberNavItems = [
     { href: '/members', label: 'Área dos Irmãos', icon: Shield },
+    { href: '/education', label: 'Educação', icon: GraduationCap },
     { href: '/members/documents', label: 'Documentos', icon: Book },
     { href: '/members/agenda', label: 'Agenda', icon: Calendar },
     { href: '/members/messages', label: 'Mensagens', icon: Users },
@@ -110,7 +110,7 @@ export const Navigation: React.FC = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
                       <Shield className="w-4 h-4 mr-1" />
-                      Área Restrita
+                      Área dos Irmãos
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg">
@@ -189,7 +189,7 @@ export const Navigation: React.FC = () => {
                   {/* Member Navigation - Only show when user is authenticated */}
                   {user && (
                     <div className="space-y-2">
-                      <h3 className="text-sm font-semibold text-muted-foreground">Área Restrita</h3>
+                      <h3 className="text-sm font-semibold text-muted-foreground">Área dos Irmãos</h3>
                       {memberNavItems.map((item) => (
                         <Link key={item.href} to={item.href} onClick={() => setIsOpen(false)}>
                           <Button
