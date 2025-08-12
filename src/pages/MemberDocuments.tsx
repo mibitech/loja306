@@ -4,10 +4,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { FileText } from 'lucide-react';
 
 const MemberDocuments: React.FC = () => {
-  const { user } = useAuth();
+  const { user, isMember } = useAuth();
 
-  if (!user) {
-    return <div className="min-h-screen flex items-center justify-center">Acesso restrito</div>;
+  if (!isMember) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Acesso Restrito</h2>
+          <p className="text-muted-foreground">
+            {user ? 'Acesso apenas para membros autorizados.' : 'Faça login para acessar esta área.'}
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

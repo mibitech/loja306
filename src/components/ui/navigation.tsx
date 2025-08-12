@@ -23,7 +23,7 @@ import { User, LogOut, Shield, Book, Users, Calendar, Crown, Menu, X, Triangle, 
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
-  const { user, signOut, loading } = useAuth();
+  const { user, isMember, signOut, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
@@ -104,25 +104,27 @@ export const Navigation: React.FC = () => {
           <div className="hidden lg:flex items-center space-x-2">
             {user ? (
               <>
-                {/* Member Navigation - Only show when user is authenticated */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Shield className="w-4 h-4 mr-1" />
-                      Área dos Irmãos
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg">
-                    {memberNavItems.map((item) => (
-                      <DropdownMenuItem key={item.href} asChild>
-                        <Link to={item.href} className="flex items-center">
-                          <item.icon className="w-4 h-4 mr-2" />
-                          {item.label}
-                        </Link>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {/* Member Navigation - Only show when user is a member */}
+                {isMember && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Shield className="w-4 h-4 mr-1" />
+                        Área dos Irmãos
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg">
+                      {memberNavItems.map((item) => (
+                        <DropdownMenuItem key={item.href} asChild>
+                          <Link to={item.href} className="flex items-center">
+                            <item.icon className="w-4 h-4 mr-2" />
+                            {item.label}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
 
                 {/* User Menu */}
                 <DropdownMenu>
@@ -185,8 +187,8 @@ export const Navigation: React.FC = () => {
                     ))}
                   </div>
 
-                  {/* Member Navigation - Only show when user is authenticated */}
-                  {user && (
+                  {/* Member Navigation - Only show when user is a member */}
+                  {isMember && (
                     <div className="space-y-2">
                       <h3 className="text-sm font-semibold text-muted-foreground">Área dos Irmãos</h3>
                       {memberNavItems.map((item) => (
