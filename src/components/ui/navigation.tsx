@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -22,7 +23,7 @@ import { User, LogOut, Shield, Book, Users, Calendar, Crown, Menu, X } from 'luc
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
@@ -43,6 +44,24 @@ export const Navigation: React.FC = () => {
     { href: '/members/messages', label: 'Mensagens', icon: Users },
     { href: '/members/worshipful-masters', label: 'Quadro de Veneráveis', icon: Crown },
   ];
+
+  // Don't render anything while loading
+  if (loading) {
+    return (
+      <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b border-border shadow-soft">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">⬜</span>
+              </div>
+              <span className="font-bold text-lg text-primary">Loja Maçônica</span>
+            </Link>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b border-border shadow-soft">
@@ -75,7 +94,7 @@ export const Navigation: React.FC = () => {
           <div className="hidden lg:flex items-center space-x-2">
             {user ? (
               <>
-                {/* Member Navigation */}
+                {/* Member Navigation - Only show when user is authenticated */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
@@ -156,7 +175,7 @@ export const Navigation: React.FC = () => {
                     ))}
                   </div>
 
-                  {/* Member Navigation */}
+                  {/* Member Navigation - Only show when user is authenticated */}
                   {user && (
                     <div className="space-y-2">
                       <h3 className="text-sm font-semibold text-muted-foreground">Área Restrita</h3>

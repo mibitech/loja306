@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,6 +41,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
+          // Clear any localStorage data
+          localStorage.removeItem('supabase.auth.token');
+          localStorage.removeItem('sb-bvrvhjxcqsjvrcdaffly-auth-token');
         }
       }
     );
@@ -84,6 +88,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       setUser(null);
       
+      // Clear localStorage manually
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-bvrvhjxcqsjvrcdaffly-auth-token');
+      
       // Then sign out from Supabase
       await supabase.auth.signOut();
       
@@ -96,11 +104,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       window.location.href = '/';
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
+      // Even if there's an error, clear the state
+      setSession(null);
+      setUser(null);
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-bvrvhjxcqsjvrcdaffly-auth-token');
+      
       toast({
         title: "Erro",
         description: "Ocorreu um erro ao encerrar a sessão.",
         variant: "destructive"
       });
+      
+      // Still redirect to home
+      window.location.href = '/';
     }
   };
 
