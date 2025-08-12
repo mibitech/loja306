@@ -76,11 +76,11 @@ const About: React.FC = () => {
       <section className="relative py-20 px-4 text-center bg-gradient-primary text-primary-foreground">
         <div className="container mx-auto max-w-4xl">
           <div className="flex items-center justify-center mb-6 gap-8">
-            <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden bg-white shadow-elegant">
+            <div className="w-40 h-40 md:w-48 md:h-48 rounded-full overflow-hidden bg-white shadow-elegant flex items-center justify-center">
               <img 
                 src="/lovable-uploads/555a306b-3510-4fe9-a1f9-b5df542462af.png" 
                 alt="Logo da Loja Maçônica"
-                className="w-full h-full object-cover object-center scale-110"
+                className="w-full h-full object-contain"
               />
             </div>
             <h1 className="text-4xl md:text-6xl font-bold">
