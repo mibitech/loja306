@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Calendar, MapPin, Clock, Users } from 'lucide-react';
 import { format, isAfter, isBefore } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Event {
   id: string;
@@ -19,70 +21,41 @@ interface Event {
 const Events: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Mock data until Supabase types are regenerated
-    const mockEvents: Event[] = [
-      {
-        id: '1',
-        title: 'Sessão Magna de Posse',
-        description: 'Cerimônia de posse da nova administração da loja.',
-        event_date: '2024-03-15T19:00:00',
-        location: 'Templo da Loja',
-        image_url: '',
-        is_public: false,
-        created_at: '2024-01-01'
-      },
-      {
-        id: '2',
-        title: 'Palestra Pública: Valores Maçônicos',
-        description: 'Evento aberto ao público sobre os valores e princípios da maçonaria.',
-        event_date: '2024-03-25T20:00:00',
-        location: 'Auditório Municipal',
-        image_url: '',
-        is_public: true,
-        created_at: '2024-01-02'
-      },
-      {
-        id: '3',
-        title: 'Sessão Ordinária',
-        description: 'Reunião ordinária dos irmãos para tratar dos assuntos da loja.',
-        event_date: '2024-04-05T19:30:00',
-        location: 'Templo da Loja',
-        image_url: '',
-        is_public: false,
-        created_at: '2024-01-03'
-      },
-      {
-        id: '4',
-        title: 'Feira de Livros Maçônicos',
-        description: 'Exposição e venda de livros sobre maçonaria e temas relacionados.',
-        event_date: '2024-04-20T09:00:00',
-        location: 'Salão de Eventos',
-        image_url: '',
-        is_public: true,
-        created_at: '2024-01-04'
-      },
-      {
-        id: '5',
-        title: 'Conferência: Maçonaria e Sociedade',
-        description: 'Discussão sobre o papel da maçonaria na sociedade contemporânea.',
-        event_date: '2024-01-10T19:00:00',
-        location: 'Centro de Convenções',
-        image_url: '',
-        is_public: true,
-        created_at: '2024-01-05'
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        
+        let query = supabase
+          .from('events')
+          .select('*')
+          .order('event_date', { ascending: true });
+
+        // If user is not authenticated, only show public events
+        if (!user) {
+          query = query.eq('is_public', true);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error('Error fetching events:', error);
+          setEvents([]);
+        } else {
+          setEvents(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching events:', error);
+        setEvents([]);
+      } finally {
+        setLoading(false);
       }
-    ];
+    };
 
-    // Only show public events since we don't have authentication context here
-    const publicEvents = mockEvents.filter(event => event.is_public);
-
-    setTimeout(() => {
-      setEvents(publicEvents);
-      setLoading(false);
-    }, 500);
-  }, []);
+    fetchEvents();
+  }, [user]);
 
   const getEventStatus = (eventDate: string) => {
     const now = new Date();
