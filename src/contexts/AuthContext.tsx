@@ -60,6 +60,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         
+        // If email confirmation happened, automatically sign out
+        if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at && !session?.user?.last_sign_in_at) {
+          setTimeout(() => {
+            signOut();
+          }, 1000);
+          return;
+        }
+        
         // Fetch user role if authenticated
         if (session?.user) {
           setTimeout(() => {
