@@ -17,26 +17,48 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    /* Masonic theme colors */
+    --primary: 220 60% 15%; /* Deep blue */
     --primary-foreground: 210 40% 98%;
+    --primary-variant: 220 70% 25%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 45 90% 88%; /* Gold accent */
+    --secondary-foreground: 220 60% 15%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 220 15% 95%; /* Light blue-gray */
+    --accent-foreground: 220 60% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 220 60% 15%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Masonic-specific design tokens */
+    --masonic-gold: 45 90% 60%;
+    --masonic-navy: 220 60% 15%;
+    --masonic-light: 220 15% 98%;
+    --masonic-gray: 220 10% 85%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-variant)));
+    --gradient-gold: linear-gradient(135deg, hsl(var(--masonic-gold)), hsl(45 70% 50%));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--accent)));
+
+    /* Shadows */
+    --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+    --shadow-soft: 0 4px 20px -5px hsl(var(--primary) / 0.15);
+    --shadow-glow: 0 0 40px hsl(var(--masonic-gold) / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
     --sidebar-background: 0 0% 98%;
 
