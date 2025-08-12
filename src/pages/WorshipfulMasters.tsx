@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Crown, Calendar, Trophy, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import venerableMasterPortrait from '@/assets/venerable-master-portrait.jpg';
 
 interface WorshipfulMaster {
   id: string;
@@ -149,7 +150,7 @@ export default function WorshipfulMasters() {
                 <div className="flex flex-col lg:flex-row items-center lg:items-start space-y-6 lg:space-y-0 lg:space-x-8">
                   <div className="flex-shrink-0">
                     <Avatar className="h-32 w-32 border-4 border-primary/20">
-                      <AvatarImage src={currentMaster.photo_url} alt={currentMaster.name} />
+                      <AvatarImage src={currentMaster.photo_url?.startsWith('/src/') ? venerableMasterPortrait : currentMaster.photo_url} alt={currentMaster.name} />
                       <AvatarFallback className="text-2xl font-semibold bg-primary/10 text-primary">
                         {getInitials(currentMaster.name)}
                       </AvatarFallback>
@@ -206,7 +207,7 @@ export default function WorshipfulMasters() {
                   <CardHeader className="pb-4">
                     <div className="flex items-center space-x-4">
                       <Avatar className="h-16 w-16 border-2 border-muted group-hover:border-primary/30 transition-colors">
-                        <AvatarImage src={master.photo_url} alt={master.name} />
+                        <AvatarImage src={master.photo_url?.startsWith('/src/') ? venerableMasterPortrait : master.photo_url} alt={master.name} />
                         <AvatarFallback className="text-lg font-semibold bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                           {getInitials(master.name)}
                         </AvatarFallback>
