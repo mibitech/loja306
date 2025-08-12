@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Book, HelpCircle, BookOpen, Search, User } from 'lucide-react';
 import educationImage from '@/assets/education.jpg';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EducationalContent {
   id: string;
@@ -41,94 +42,28 @@ const Education: React.FC = () => {
   };
 
   useEffect(() => {
-    // Mock data until Supabase types are regenerated
-    const mockContent: EducationalContent[] = [
-      {
-        id: '1',
-        title: 'O que é a Maçonaria?',
-        content: 'A Maçonaria é uma instituição iniciática, filosófica, educativa, filantrópica e progressista. Seus membros, chamados maçons, buscam o aperfeiçoamento moral e intelectual através de simbolismo e rituais tradicionais.\n\nFundada nos princípios de Liberdade, Igualdade e Fraternidade, a Maçonaria promove o desenvolvimento do caráter e o bem-estar da humanidade.',
-        category: 'introduction',
-        author: 'Grande Loja',
-        is_featured: true,
-        sort_order: 1,
-        created_at: '2024-01-01'
-      },
-      {
-        id: '2',
-        title: 'História da Maçonaria no Brasil',
-        content: 'A Maçonaria chegou ao Brasil no século XVIII e teve papel fundamental na independência do país. Muitos dos protagonistas da independência eram maçons, incluindo Dom Pedro I.\n\nA primeira loja maçônica brasileira foi fundada no Rio de Janeiro em 1801, e desde então a instituição tem contribuído para o desenvolvimento social e cultural do país.',
-        category: 'introduction',
-        author: 'Ir. José Santos',
-        is_featured: true,
-        sort_order: 2,
-        created_at: '2024-01-02'
-      },
-      {
-        id: '3',
-        title: 'Símbolos Maçônicos Básicos',
-        content: 'Os principais símbolos da maçonaria incluem:\n\n• Esquadro e Compasso: Representam a moralidade e os limites que devemos observar\n• Avental: Símbolo do trabalho e da pureza\n• Pilares da Sabedoria, Força e Beleza: Sustentáculos da loja\n• Régua de 24 polegadas: Divisão do tempo\n• Nível: Igualdade entre os homens',
-        category: 'introduction',
-        author: 'Ir. Pedro Silva',
-        is_featured: false,
-        sort_order: 3,
-        created_at: '2024-01-03'
-      },
-      {
-        id: '4',
-        title: 'Graus Maçônicos',
-        content: 'A Maçonaria está dividida em três graus simbólicos:\n\n1º Grau - Aprendiz: Simboliza o nascimento e a juventude\n2º Grau - Companheiro: Representa a idade viril e o trabalho\n3º Grau - Mestre: Simboliza a maturidade e sabedoria\n\nCada grau possui seus próprios ensinamentos, símbolos e rituais específicos.',
-        category: 'articles',
-        author: 'Ir. Carlos Mendes',
-        is_featured: true,
-        sort_order: 1,
-        created_at: '2024-01-04'
-      },
-      {
-        id: '5',
-        title: 'Esquadro',
-        content: 'Instrumento utilizado pelos pedreiros para formar ângulos retos. Na Maçonaria, simboliza a retidão moral e a justiça. Representa os deveres que temos para com nossos semelhantes.',
-        category: 'glossary',
-        author: 'Dicionário Maçônico',
-        is_featured: false,
-        sort_order: 1,
-        created_at: '2024-01-05'
-      },
-      {
-        id: '6',
-        title: 'Compasso',
-        content: 'Instrumento de geometria usado para traçar círculos. Simboliza a moderação e os limites dentro dos quais devemos manter nossos desejos e paixões.',
-        category: 'glossary',
-        author: 'Dicionário Maçônico',
-        is_featured: false,
-        sort_order: 2,
-        created_at: '2024-01-06'
-      },
-      {
-        id: '7',
-        title: 'Como posso me tornar maçom?',
-        content: 'Para se tornar maçom, você deve:\n\n• Ser maior de 21 anos\n• Ter boa reputação moral\n• Acreditar em um Ser Supremo\n• Ter meios de subsistência lícitos\n• Ser apresentado por um maçom ativo\n\nO processo inclui entrevistas, investigação moral e votação pelos membros da loja.',
-        category: 'faq',
-        author: 'Comissão de Admissão',
-        is_featured: true,
-        sort_order: 1,
-        created_at: '2024-01-07'
-      },
-      {
-        id: '8',
-        title: 'Que livros posso ler sobre Maçonaria?',
-        content: 'Recomendamos os seguintes livros para iniciantes:\n\n• "Freemasons For Dummies" - Christopher Hodapp\n• "A Franco-Maçonaria" - José Castellani\n• "Curso de Maçonaria Simbólica" - Irmão X\n• "Manual do Maçom" - Nicola Aslan\n• "História da Maçonaria no Brasil" - José Castellani',
-        category: 'reading',
-        author: 'Biblioteca da Loja',
-        is_featured: false,
-        sort_order: 1,
-        created_at: '2024-01-08'
-      }
-    ];
+    const fetchContent = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('educational_content')
+          .select('*')
+          .order('sort_order', { ascending: true });
 
-    setTimeout(() => {
-      setContent(mockContent);
-      setLoading(false);
-    }, 500);
+        if (error) {
+          console.error('Error fetching educational content:', error);
+          return;
+        }
+
+        setContent(data || []);
+      } catch (error) {
+        console.error('Error fetching educational content:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContent();
   }, []);
 
   const getFilteredContent = (category: string) => {
