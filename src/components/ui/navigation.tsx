@@ -52,11 +52,14 @@ export const Navigation: React.FC = () => {
       <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b border-border shadow-soft">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-                <Triangle className="w-4 h-4 text-primary-foreground" />
+            <Link to="/" className="flex items-center space-x-3">
+              <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center shadow-glow">
+                <Triangle className="w-6 h-6 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg text-primary">Loja Maçônica</span>
+              <div className="flex flex-col">
+                <span className="font-bold text-xl text-primary">Loja Maçônica</span>
+                <span className="text-sm text-muted-foreground">Luz e Progresso</span>
+              </div>
             </Link>
           </div>
         </div>
@@ -69,11 +72,18 @@ export const Navigation: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-              <Triangle className="w-4 h-4 text-primary-foreground" />
+          <Link to="/" className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center shadow-glow">
+              <Triangle className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg text-primary">Loja Maçônica</span>
+            <div className="hidden sm:flex flex-col">
+              <span className="font-bold text-xl text-primary">Loja Maçônica</span>
+              <span className="text-sm text-muted-foreground">Luz e Progresso</span>
+            </div>
+            <div className="flex sm:hidden flex-col items-center">
+              <span className="font-bold text-lg text-primary">Loja Maçônica</span>
+              <span className="text-xs text-muted-foreground">Luz e Progresso</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation Links */}
