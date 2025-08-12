@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -10,11 +10,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Shield, Book, Users, Calendar, Crown } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { User, LogOut, Shield, Book, Users, Calendar, Crown, Menu, X } from 'lucide-react';
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -47,8 +56,8 @@ export const Navigation: React.FC = () => {
             <span className="font-bold text-lg text-primary">Loja Maçônica</span>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-1">
+          {/* Desktop Navigation Links */}
+          <div className="hidden lg:flex items-center space-x-1">
             {publicNavItems.map((item) => (
               <Link key={item.href} to={item.href}>
                 <Button
@@ -62,19 +71,19 @@ export const Navigation: React.FC = () => {
             ))}
           </div>
 
-          {/* Auth Section */}
-          <div className="flex items-center space-x-2">
+          {/* Desktop Auth Section */}
+          <div className="hidden lg:flex items-center space-x-2">
             {user ? (
               <>
                 {/* Member Navigation */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="hidden md:flex">
+                    <Button variant="outline" size="sm">
                       <Shield className="w-4 h-4 mr-1" />
                       Área Restrita
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg">
                     {memberNavItems.map((item) => (
                       <DropdownMenuItem key={item.href} asChild>
                         <Link to={item.href} className="flex items-center">
@@ -94,7 +103,7 @@ export const Navigation: React.FC = () => {
                       {user.email?.split('@')[0]}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="bg-background border shadow-lg">
                     <DropdownMenuItem asChild>
                       <Link to="/profile">Perfil</Link>
                     </DropdownMenuItem>
@@ -113,6 +122,92 @@ export const Navigation: React.FC = () => {
                 </Button>
               </Link>
             )}
+          </div>
+
+          {/* Mobile Menu */}
+          <div className="lg:hidden">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 bg-background">
+                <SheetHeader>
+                  <SheetTitle className="text-left">Menu</SheetTitle>
+                  <SheetDescription className="text-left">
+                    Navegue pelas seções do site
+                  </SheetDescription>
+                </SheetHeader>
+                
+                <div className="mt-6 space-y-4">
+                  {/* Public Navigation */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-muted-foreground">Navegação</h3>
+                    {publicNavItems.map((item) => (
+                      <Link key={item.href} to={item.href} onClick={() => setIsOpen(false)}>
+                        <Button
+                          variant={isActive(item.href) ? "default" : "ghost"}
+                          className="w-full justify-start"
+                        >
+                          {item.label}
+                        </Button>
+                      </Link>
+                    ))}
+                  </div>
+
+                  {/* Member Navigation */}
+                  {user && (
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-semibold text-muted-foreground">Área Restrita</h3>
+                      {memberNavItems.map((item) => (
+                        <Link key={item.href} to={item.href} onClick={() => setIsOpen(false)}>
+                          <Button
+                            variant={isActive(item.href) ? "default" : "ghost"}
+                            className="w-full justify-start"
+                          >
+                            <item.icon className="w-4 h-4 mr-2" />
+                            {item.label}
+                          </Button>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Auth Section */}
+                  <div className="space-y-2 pt-4 border-t">
+                    {user ? (
+                      <>
+                        <h3 className="text-sm font-semibold text-muted-foreground">Conta</h3>
+                        <Link to="/profile" onClick={() => setIsOpen(false)}>
+                          <Button variant="ghost" className="w-full justify-start">
+                            <User className="w-4 h-4 mr-2" />
+                            Perfil
+                          </Button>
+                        </Link>
+                        <Button 
+                          variant="ghost" 
+                          className="w-full justify-start text-destructive hover:text-destructive"
+                          onClick={() => {
+                            signOut();
+                            setIsOpen(false);
+                          }}
+                        >
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sair
+                        </Button>
+                      </>
+                    ) : (
+                      <Link to="/auth" onClick={() => setIsOpen(false)}>
+                        <Button className="w-full bg-gradient-primary hover:opacity-90">
+                          Entrar
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
