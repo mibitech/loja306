@@ -19,7 +19,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { User, LogOut, Shield, Book, Users, Calendar, Crown, Menu, X } from 'lucide-react';
+import { User, LogOut, Shield, Book, Users, Calendar, Crown, Menu, X, Compass } from 'lucide-react';
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
@@ -53,9 +53,12 @@ export const Navigation: React.FC = () => {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">⬜</span>
+                <Compass className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg text-primary">Loja Maçônica</span>
+              <span className="font-bold text-lg text-primary flex items-center gap-2">
+                <Compass className="w-5 h-5 text-primary" />
+                Loja Maçônica
+              </span>
             </Link>
           </div>
         </div>
@@ -70,9 +73,12 @@ export const Navigation: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">⬜</span>
+              <Compass className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg text-primary">Loja Maçônica</span>
+            <span className="font-bold text-lg text-primary flex items-center gap-2">
+              <Compass className="w-5 h-5 text-primary" />
+              Loja Maçônica
+            </span>
           </Link>
 
           {/* Desktop Navigation Links */}
