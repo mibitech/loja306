@@ -75,16 +75,16 @@ const About: React.FC = () => {
       {/* Hero Section */}
       <section className="relative py-20 px-4 text-center bg-gradient-primary text-primary-foreground">
         <div className="container mx-auto max-w-4xl">
-          <div className="flex items-center justify-center mb-6 gap-8">
-            <div className="w-40 aspect-square md:w-48 md:aspect-square rounded-full overflow-hidden bg-white shadow-elegant flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center mb-6">
+            <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden bg-white shadow-elegant flex items-center justify-center mb-6">
               <img 
                 src="/lovable-uploads/555a306b-3510-4fe9-a1f9-b5df542462af.png" 
                 alt="Logo da Loja Maçônica"
-                className="w-36 h-36 md:w-44 md:h-44 object-contain rounded-full"
+                className="w-44 h-44 md:w-52 md:h-52 object-contain rounded-full"
               />
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold">
-              {lodgeInfo?.name || 'Nossa Loja'}
+            <h1 className="text-4xl md:text-6xl font-bold text-center">
+              Cruz da Distinção Maçônica Amor da Pátria
             </h1>
           </div>
           {lodgeInfo?.subtitle && (
