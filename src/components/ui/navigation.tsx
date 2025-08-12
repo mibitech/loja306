@@ -19,7 +19,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { User, LogOut, Shield, Book, Users, Calendar, Crown, Menu, X, Triangle } from 'lucide-react';
+import { User, LogOut, Shield, Book, Users, Calendar, Crown, Menu, X, Triangle, GraduationCap } from 'lucide-react';
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
@@ -42,6 +42,7 @@ export const Navigation: React.FC = () => {
     { href: '/members/documents', label: 'Documentos', icon: Book },
     { href: '/members/agenda', label: 'Agenda', icon: Calendar },
     { href: '/members/messages', label: 'Mensagens', icon: Users },
+    { href: '/members/study-time', label: 'Tempo de Estudos', icon: GraduationCap },
     { href: '/members/worshipful-masters', label: 'Quadro de Veneráveis', icon: Crown },
   ];
 

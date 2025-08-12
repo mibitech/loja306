@@ -445,6 +445,51 @@ export type Database = {
         }
         Relationships: []
       }
+      study_works: {
+        Row: {
+          brother_name: string
+          category: string | null
+          created_at: string
+          description: string | null
+          file_path: string
+          file_size: number | null
+          id: string
+          is_approved: boolean | null
+          updated_at: string
+          upload_date: string
+          uploaded_by: string | null
+          work_title: string
+        }
+        Insert: {
+          brother_name: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_size?: number | null
+          id?: string
+          is_approved?: boolean | null
+          updated_at?: string
+          upload_date?: string
+          uploaded_by?: string | null
+          work_title: string
+        }
+        Update: {
+          brother_name?: string
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          is_approved?: boolean | null
+          updated_at?: string
+          upload_date?: string
+          uploaded_by?: string | null
+          work_title?: string
+        }
+        Relationships: []
+      }
       worshipful_masters: {
         Row: {
           achievements: string | null
