@@ -132,7 +132,7 @@ export const Navigation: React.FC = () => {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80 bg-background">
+              <SheetContent side="right" className="w-80 bg-background overflow-y-auto max-h-screen">
                 <SheetHeader>
                   <SheetTitle className="text-left">Menu</SheetTitle>
                   <SheetDescription className="text-left">

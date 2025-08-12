@@ -72,13 +72,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: "Sessão encerrada",
-      description: "Você saiu da área restrita com sucesso.",
-    });
-    // Redirect to home page
-    window.location.href = '/';
+    try {
+      await supabase.auth.signOut();
+      // Clear any cached session data
+      setSession(null);
+      setUser(null);
+      
+      toast({
+        title: "Sessão encerrada",
+        description: "Você saiu da área restrita com sucesso.",
+      });
+      
+      // Force page reload to ensure complete logout
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao encerrar a sessão.",
+        variant: "destructive"
+      });
+    }
   };
 
   const value = {
