@@ -80,17 +80,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
-      // Clear any cached session data
+      // Clear state first to immediately hide restricted areas
       setSession(null);
       setUser(null);
+      
+      // Then sign out from Supabase
+      await supabase.auth.signOut();
       
       toast({
         title: "Sessão encerrada",
         description: "Você saiu da área restrita com sucesso.",
       });
       
-      // Force page reload to ensure complete logout
+      // Force page reload to ensure complete logout and redirect to home
       window.location.href = '/';
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
