@@ -75,9 +75,16 @@ const About: React.FC = () => {
       {/* Hero Section */}
       <section className="relative py-20 px-4 text-center bg-gradient-primary text-primary-foreground">
         <div className="container mx-auto max-w-4xl">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            {lodgeInfo?.name || 'Nossa Loja'}
-          </h1>
+          <div className="flex items-center justify-center mb-6 gap-6">
+            <img 
+              src="/lovable-uploads/555a306b-3510-4fe9-a1f9-b5df542462af.png" 
+              alt="Logo da Loja Maçônica"
+              className="w-24 h-24 md:w-32 md:h-32 object-contain"
+            />
+            <h1 className="text-4xl md:text-6xl font-bold">
+              {lodgeInfo?.name || 'Nossa Loja'}
+            </h1>
+          </div>
           {lodgeInfo?.subtitle && (
             <p className="text-xl md:text-2xl opacity-90 mb-8">
               {lodgeInfo.subtitle}
