@@ -16,6 +16,7 @@ import Members from "./pages/Members";
 import MemberDocuments from "./pages/MemberDocuments";
 import MemberAgenda from "./pages/MemberAgenda";
 import MemberMessages from "./pages/MemberMessages";
+import WorshipfulMasters from "./pages/WorshipfulMasters";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/members/documents" element={<MemberDocuments />} />
             <Route path="/members/agenda" element={<MemberAgenda />} />
             <Route path="/members/messages" element={<MemberMessages />} />
+            <Route path="/members/worshipful-masters" element={<WorshipfulMasters />} />
             <Route path="/profile" element={<Profile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Shield, Book, Users, Calendar } from 'lucide-react';
+import { User, LogOut, Shield, Book, Users, Calendar, Crown } from 'lucide-react';
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
@@ -32,6 +32,7 @@ export const Navigation: React.FC = () => {
     { href: '/members/documents', label: 'Documentos', icon: Book },
     { href: '/members/agenda', label: 'Agenda', icon: Calendar },
     { href: '/members/messages', label: 'Mensagens', icon: Users },
+    { href: '/members/worshipful-masters', label: 'Quadro de Veneráveis', icon: Crown },
   ];
 
   return (
