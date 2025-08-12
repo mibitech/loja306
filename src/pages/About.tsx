@@ -84,7 +84,7 @@ const About: React.FC = () => {
               />
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-center">
-              Cruz da Distinção Maçônica Amor da Pátria
+              Cruz da Excelência Maçônica Amor da Pátria
             </h1>
           </div>
           {lodgeInfo?.subtitle && (
