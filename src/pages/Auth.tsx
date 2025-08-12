@@ -32,11 +32,19 @@ const Auth: React.FC = () => {
     try {
       const { error } = await signIn(email, password);
       if (error) {
+        let errorMessage = "";
+        
+        if (error.message === "Invalid login credentials") {
+          errorMessage = "Email ou senha incorretos";
+        } else if (error.message === "Email not confirmed") {
+          errorMessage = "Email não confirmado. Verifique sua caixa de entrada e clique no link de confirmação.";
+        } else {
+          errorMessage = error.message;
+        }
+        
         toast({
           title: "Erro no login",
-          description: error.message === "Invalid login credentials" 
-            ? "Email ou senha incorretos" 
-            : error.message,
+          description: errorMessage,
           variant: "destructive",
         });
       } else {
