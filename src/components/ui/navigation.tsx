@@ -37,7 +37,6 @@ export const Navigation: React.FC = () => {
   ];
 
   const memberNavItems = [
-    { href: '/members', label: 'Área dos Irmãos', icon: Shield },
     { href: '/education', label: 'Educação', icon: GraduationCap },
     { href: '/members/documents', label: 'Documentos', icon: Book },
     { href: '/members/agenda', label: 'Agenda', icon: Calendar },
