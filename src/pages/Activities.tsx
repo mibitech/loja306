@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Calendar, Users, Heart, Award, BookOpen, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import charityImage from '@/assets/charity-work.jpg';
 
 interface Activity {
@@ -27,6 +29,7 @@ const Activities: React.FC = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const { user } = useAuth();
 
   const categoryLabels = {
     all: 'Todas',
@@ -46,65 +49,43 @@ const Activities: React.FC = () => {
   };
 
   useEffect(() => {
-    // Mock data until Supabase types are regenerated
-    const mockActivities: Activity[] = [
-      {
-        id: '1',
-        title: 'Campanha de Arrecadação de Alimentos',
-        description: 'Campanha beneficente para arrecadação de alimentos não perecíveis.',
-        content: 'Nossa loja promoveu uma grande campanha de arrecadação de alimentos que beneficiou mais de 200 famílias carentes da região.',
-        category: 'social',
-        image_url: charityImage,
-        gallery_images: [charityImage],
-        results: 'Arrecadadas 2 toneladas de alimentos, beneficiando 200 famílias',
-        partnerships: ['Casa de Apoio Santa Maria', 'Orfanato São José'],
-        event_date: '2024-01-15',
-        is_featured: true,
-        is_public: true,
-        created_at: '2024-01-15'
-      },
-      {
-        id: '2',
-        title: 'Palestra Pública: História da Maçonaria',
-        description: 'Evento educativo aberto ao público sobre a história da maçonaria no Brasil.',
-        content: 'Realizamos uma palestra pública ministrada pelo Ir. João Silva sobre a história da maçonaria no Brasil.',
-        category: 'educational',
-        image_url: charityImage,
-        gallery_images: [],
-        results: 'Mais de 100 pessoas presentes, grande interesse do público',
-        partnerships: ['Centro Cultural da Cidade'],
-        event_date: '2024-02-20',
-        is_featured: false,
-        is_public: true,
-        created_at: '2024-02-20'
-      },
-      {
-        id: '3',
-        title: 'Projeto Educação para Todos',
-        description: 'Iniciativa educacional para jovens em situação de vulnerabilidade.',
-        content: 'Programa de mentoria e apoio educacional para jovens da comunidade.',
-        category: 'educational',
-        image_url: charityImage,
-        gallery_images: [],
-        results: '50 jovens atendidos, 80% de aprovação escolar',
-        partnerships: ['Escola Municipal Santos Dumont'],
-        event_date: '2024-03-10',
-        is_featured: true,
-        is_public: true,
-        created_at: '2024-03-10'
+    const fetchActivities = async () => {
+      try {
+        setLoading(true);
+        
+        let query = supabase
+          .from('activities')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        // If user is not authenticated, only show public activities
+        if (!user) {
+          query = query.eq('is_public', true);
+        }
+
+        // Apply category filter
+        if (selectedCategory !== 'all') {
+          query = query.eq('category', selectedCategory);
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error('Error fetching activities:', error);
+          setActivities([]);
+        } else {
+          setActivities(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching activities:', error);
+        setActivities([]);
+      } finally {
+        setLoading(false);
       }
-    ];
+    };
 
-    // Filter by category if not 'all'
-    const filteredActivities = selectedCategory === 'all' 
-      ? mockActivities 
-      : mockActivities.filter(activity => activity.category === selectedCategory);
-
-    setTimeout(() => {
-      setActivities(filteredActivities);
-      setLoading(false);
-    }, 500);
-  }, [selectedCategory]);
+    fetchActivities();
+  }, [user, selectedCategory]);
 
   if (loading) {
     return (
