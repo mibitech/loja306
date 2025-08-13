@@ -98,6 +98,18 @@ const CommissionCRUD: React.FC = () => {
   const [editingProfile, setEditingProfile] = useState<string | null>(null);
   const [editingMaster, setEditingMaster] = useState<string | null>(null);
 
+  // Load data - useEffect MUST be declared before any conditional returns
+  useEffect(() => {
+    // Only load data if user is a commission member
+    if (isCommissionMember) {
+      loadEvents();
+      loadActivities();
+      loadProfiles();
+      loadMasters();
+    }
+  }, [isCommissionMember]);
+
+  // Conditional return AFTER all hooks are declared
   if (!isCommissionMember) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -114,13 +126,7 @@ const CommissionCRUD: React.FC = () => {
     );
   }
 
-  // Load data
-  useEffect(() => {
-    loadEvents();
-    loadActivities();
-    loadProfiles();
-    loadMasters();
-  }, []);
+  // Load data functions (moved after conditional return)
 
   const loadEvents = async () => {
     const { data, error } = await supabase
