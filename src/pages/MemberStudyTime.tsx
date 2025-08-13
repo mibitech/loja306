@@ -82,8 +82,15 @@ const MemberStudyTime: React.FC = () => {
 
     setUploading(true);
     try {
+      // Sanitize file name by removing special characters and accents
+      const sanitizedFileName = selectedFile.name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[^a-zA-Z0-9._-]/g, '_') // Replace special chars with underscore
+        .replace(/_+/g, '_'); // Replace multiple underscores with single one
+      
       // Upload file to storage
-      const fileName = `${user.id}/${Date.now()}_${selectedFile.name}`;
+      const fileName = `${user.id}/${Date.now()}_${sanitizedFileName}`;
       const { error: uploadError } = await supabase.storage
         .from('study-documents')
         .upload(fileName, selectedFile);
