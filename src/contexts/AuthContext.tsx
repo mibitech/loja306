@@ -10,6 +10,7 @@ interface AuthContextType {
   loading: boolean;
   userRole: string | null;
   isMember: boolean;
+  isCommissionMember: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
@@ -31,24 +32,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isMember, setIsMember] = useState(false);
+  const [isCommissionMember, setIsCommissionMember] = useState(false);
 
-  const fetchUserRole = async (userId: string) => {
+  const fetchUserProfile = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, is_commission_member')
         .eq('user_id', userId)
         .single();
       
       if (error) {
-        console.error('Erro ao buscar role do usuário:', error);
-        return null;
+        console.error('Erro ao buscar perfil do usuário:', error);
+        return { role: null, isCommissionMember: false };
       }
       
-      return data.role;
+      return { 
+        role: data.role, 
+        isCommissionMember: data.is_commission_member || false 
+      };
     } catch (error) {
-      console.error('Erro inesperado ao buscar role:', error);
-      return null;
+      console.error('Erro inesperado ao buscar perfil:', error);
+      return { role: null, isCommissionMember: false };
     }
   };
 
@@ -68,18 +73,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
         
-        // Fetch user role if authenticated
+        // Fetch user profile if authenticated
         if (session?.user) {
           setTimeout(() => {
-            fetchUserRole(session.user.id).then(role => {
+            fetchUserProfile(session.user.id).then(({ role, isCommissionMember }) => {
               setUserRole(role);
               setIsMember(role === 'member');
+              setIsCommissionMember(isCommissionMember);
               setLoading(false);
             });
           }, 0);
         } else {
           setUserRole(null);
           setIsMember(false);
+          setIsCommissionMember(false);
           setLoading(false);
         }
         
@@ -89,6 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(null);
           setUserRole(null);
           setIsMember(false);
+          setIsCommissionMember(false);
           // Clear any localStorage data
           localStorage.removeItem('supabase.auth.token');
           localStorage.removeItem('sb-bvrvhjxcqsjvrcdaffly-auth-token');
@@ -102,9 +110,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchUserRole(session.user.id).then(role => {
+        fetchUserProfile(session.user.id).then(({ role, isCommissionMember }) => {
           setUserRole(role);
           setIsMember(role === 'member');
+          setIsCommissionMember(isCommissionMember);
           setLoading(false);
         });
       } else {
@@ -146,6 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       setUserRole(null);
       setIsMember(false);
+      setIsCommissionMember(false);
       
       // Clear localStorage manually
       localStorage.removeItem('supabase.auth.token');
@@ -168,6 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       setUserRole(null);
       setIsMember(false);
+      setIsCommissionMember(false);
       localStorage.removeItem('supabase.auth.token');
       localStorage.removeItem('sb-bvrvhjxcqsjvrcdaffly-auth-token');
       
@@ -188,6 +199,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     userRole,
     isMember,
+    isCommissionMember,
     signIn,
     signUp,
     signOut,

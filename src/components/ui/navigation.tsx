@@ -19,11 +19,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { User, LogOut, Shield, Book, Users, Calendar, Crown, Menu, X, Triangle, GraduationCap } from 'lucide-react';
+import { User, LogOut, Shield, Book, Users, Calendar, Crown, Menu, X, Triangle, GraduationCap, Settings, FileText, DollarSign, ClipboardList } from 'lucide-react';
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
-  const { user, isMember, signOut, loading } = useAuth();
+  const { user, isMember, isCommissionMember, signOut, loading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
@@ -43,6 +43,12 @@ export const Navigation: React.FC = () => {
     { href: '/members/messages', label: 'Mensagens', icon: Users },
     { href: '/members/study-time', label: 'Tempo de Estudos', icon: GraduationCap },
     { href: '/members/worshipful-masters', label: 'Quadro de Veneráveis', icon: Crown },
+  ];
+
+  const commissionNavItems = [
+    { href: '/commission/crud', label: 'Cadastros', icon: Settings },
+    { href: '/commission/finance', label: 'Financeiro', icon: DollarSign },
+    { href: '/commission/secretary', label: 'Secretaria', icon: ClipboardList },
   ];
 
   // Don't render anything while loading
@@ -124,7 +130,29 @@ export const Navigation: React.FC = () => {
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
-                )}
+                 )}
+
+                 {/* Commission Navigation - Only show when user is a commission member */}
+                 {isCommissionMember && (
+                   <DropdownMenu>
+                     <DropdownMenuTrigger asChild>
+                       <Button variant="outline" size="sm">
+                         <Settings className="w-4 h-4 mr-1" />
+                         Área da Comissão
+                       </Button>
+                     </DropdownMenuTrigger>
+                     <DropdownMenuContent align="end" className="w-48 bg-background border shadow-lg">
+                       {commissionNavItems.map((item) => (
+                         <DropdownMenuItem key={item.href} asChild>
+                           <Link to={item.href} className="flex items-center">
+                             <item.icon className="w-4 h-4 mr-2" />
+                             {item.label}
+                           </Link>
+                         </DropdownMenuItem>
+                       ))}
+                     </DropdownMenuContent>
+                   </DropdownMenu>
+                 )}
 
                 {/* User Menu */}
                 <DropdownMenu>
@@ -203,7 +231,25 @@ export const Navigation: React.FC = () => {
                         </Link>
                       ))}
                     </div>
-                  )}
+                   )}
+
+                   {/* Commission Navigation - Only show when user is a commission member */}
+                   {isCommissionMember && (
+                     <div className="space-y-2">
+                       <h3 className="text-sm font-semibold text-muted-foreground">Área da Comissão</h3>
+                       {commissionNavItems.map((item) => (
+                         <Link key={item.href} to={item.href} onClick={() => setIsOpen(false)}>
+                           <Button
+                             variant={isActive(item.href) ? "default" : "ghost"}
+                             className="w-full justify-start"
+                           >
+                             <item.icon className="w-4 h-4 mr-2" />
+                             {item.label}
+                           </Button>
+                         </Link>
+                       ))}
+                     </div>
+                   )}
 
                   {/* Auth Section */}
                   <div className="space-y-2 pt-4 border-t">

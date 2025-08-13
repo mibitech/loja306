@@ -378,6 +378,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_commission_member: boolean | null
           photo_url: string | null
           position: string | null
           role: string | null
@@ -388,6 +389,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          is_commission_member?: boolean | null
           photo_url?: string | null
           position?: string | null
           role?: string | null
@@ -398,6 +400,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          is_commission_member?: boolean | null
           photo_url?: string | null
           position?: string | null
           role?: string | null

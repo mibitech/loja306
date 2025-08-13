@@ -18,6 +18,9 @@ import MemberAgenda from "./pages/MemberAgenda";
 import MemberMessages from "./pages/MemberMessages";
 import MemberStudyTime from "./pages/MemberStudyTime";
 import WorshipfulMasters from "./pages/WorshipfulMasters";
+import CommissionCRUD from "./pages/CommissionCRUD";
+import CommissionFinance from "./pages/CommissionFinance";
+import CommissionSecretary from "./pages/CommissionSecretary";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -45,6 +48,9 @@ const App = () => (
             <Route path="/members/study-time" element={<MemberStudyTime />} />
             <Route path="/members/messages" element={<MemberMessages />} />
             <Route path="/members/worshipful-masters" element={<WorshipfulMasters />} />
+            <Route path="/commission/crud" element={<CommissionCRUD />} />
+            <Route path="/commission/finance" element={<CommissionFinance />} />
+            <Route path="/commission/secretary" element={<CommissionSecretary />} />
             <Route path="/profile" element={<Profile />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
