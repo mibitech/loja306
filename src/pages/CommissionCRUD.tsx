@@ -51,6 +51,7 @@ interface Profile {
   role?: string;
   position?: string;
   photo_url?: string;
+  masonic_degree: number;
   is_commission_member: boolean;
   created_at: string;
   updated_at: string;
@@ -671,6 +672,7 @@ const CommissionCRUD: React.FC = () => {
                       <TableHead>Nome</TableHead>
                       <TableHead>Cargo</TableHead>
                       <TableHead>Posição</TableHead>
+                      <TableHead>Grau</TableHead>
                       <TableHead>Comissão</TableHead>
                       <TableHead>Ações</TableHead>
                     </TableRow>
@@ -681,6 +683,11 @@ const CommissionCRUD: React.FC = () => {
                         <TableCell>{profile.full_name || '-'}</TableCell>
                         <TableCell>{profile.role || '-'}</TableCell>
                         <TableCell>{profile.position || '-'}</TableCell>
+                        <TableCell>
+                          {profile.masonic_degree === 1 ? 'Aprendiz' : 
+                           profile.masonic_degree === 2 ? 'Companheiro' : 
+                           profile.masonic_degree === 3 ? 'Mestre' : '-'}
+                        </TableCell>
                         <TableCell>{profile.is_commission_member ? 'Sim' : 'Não'}</TableCell>
                         <TableCell>
                           <Dialog open={profileDialog && editingProfile === profile.id} onOpenChange={(open) => {
@@ -724,6 +731,18 @@ const CommissionCRUD: React.FC = () => {
                                     value={profileForm.photo_url || ''}
                                     onChange={(e) => setProfileForm({...profileForm, photo_url: e.target.value})}
                                   />
+                                </div>
+                                <div>
+                                  <Label>Grau Maçônico</Label>
+                                  <select
+                                    value={profileForm.masonic_degree || 1}
+                                    onChange={(e) => setProfileForm({...profileForm, masonic_degree: parseInt(e.target.value)})}
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    <option value={1}>1 - Aprendiz</option>
+                                    <option value={2}>2 - Companheiro</option>
+                                    <option value={3}>3 - Mestre</option>
+                                  </select>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   <Switch

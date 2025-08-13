@@ -379,6 +379,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_commission_member: boolean | null
+          masonic_degree: number
           photo_url: string | null
           position: string | null
           role: string | null
@@ -390,6 +391,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_commission_member?: boolean | null
+          masonic_degree?: number
           photo_url?: string | null
           position?: string | null
           role?: string | null
@@ -401,6 +403,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_commission_member?: boolean | null
+          masonic_degree?: number
           photo_url?: string | null
           position?: string | null
           role?: string | null
