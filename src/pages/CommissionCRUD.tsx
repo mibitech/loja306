@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Settings, Calendar as CalendarIcon, Activity, Users, Plus, Edit, Trash2, Crown } from 'lucide-react';
+import { Settings, Calendar as CalendarIcon, Activity, Users, Plus, Edit, Trash2, Crown, BookOpen } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -72,6 +72,21 @@ interface WorshipfulMaster {
   updated_at: string;
 }
 
+interface StudyWork {
+  id: string;
+  brother_name: string;
+  work_title: string;
+  file_path: string;
+  file_size: number;
+  upload_date: string;
+  description?: string;
+  category: string;
+  is_approved: boolean;
+  uploaded_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
 const CommissionCRUD: React.FC = () => {
   const { user, isCommissionMember } = useAuth();
   
@@ -80,24 +95,28 @@ const CommissionCRUD: React.FC = () => {
   const [activities, setActivities] = useState<ActivityType[]>([]);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [masters, setMasters] = useState<WorshipfulMaster[]>([]);
+  const [studyWorks, setStudyWorks] = useState<StudyWork[]>([]);
   
   // States for forms
   const [eventForm, setEventForm] = useState<Partial<Event>>({});
   const [activityForm, setActivityForm] = useState<Partial<ActivityType>>({});
   const [profileForm, setProfileForm] = useState<Partial<Profile>>({});
   const [masterForm, setMasterForm] = useState<Partial<WorshipfulMaster>>({});
+  const [studyWorkForm, setStudyWorkForm] = useState<Partial<StudyWork>>({});
   
   // States for dialogs
   const [eventDialog, setEventDialog] = useState(false);
   const [activityDialog, setActivityDialog] = useState(false);
   const [profileDialog, setProfileDialog] = useState(false);
   const [masterDialog, setMasterDialog] = useState(false);
+  const [studyWorkDialog, setStudyWorkDialog] = useState(false);
   
   // States for edit mode
   const [editingEvent, setEditingEvent] = useState<string | null>(null);
   const [editingActivity, setEditingActivity] = useState<string | null>(null);
   const [editingProfile, setEditingProfile] = useState<string | null>(null);
   const [editingMaster, setEditingMaster] = useState<string | null>(null);
+  const [editingStudyWork, setEditingStudyWork] = useState<string | null>(null);
 
   // Load data - useEffect MUST be declared before any conditional returns
   useEffect(() => {
@@ -107,6 +126,7 @@ const CommissionCRUD: React.FC = () => {
       loadActivities();
       loadProfiles();
       loadMasters();
+      loadStudyWorks();
     }
   }, [isCommissionMember]);
 
@@ -178,6 +198,19 @@ const CommissionCRUD: React.FC = () => {
       toast({ title: 'Erro', description: 'Falha ao carregar mestres', variant: 'destructive' });
     } else {
       setMasters(data || []);
+    }
+  };
+
+  const loadStudyWorks = async () => {
+    const { data, error } = await supabase
+      .from('study_works')
+      .select('*')
+      .order('upload_date', { ascending: false });
+    
+    if (error) {
+      toast({ title: 'Erro', description: 'Falha ao carregar trabalhos de estudo', variant: 'destructive' });
+    } else {
+      setStudyWorks(data || []);
     }
   };
 
@@ -406,6 +439,85 @@ const CommissionCRUD: React.FC = () => {
     }
   };
 
+  // StudyWork CRUD
+  const saveStudyWork = async () => {
+    if (!studyWorkForm.brother_name || !studyWorkForm.work_title || !studyWorkForm.category) {
+      toast({ title: 'Erro', description: 'Nome do irmão, título e categoria são obrigatórios', variant: 'destructive' });
+      return;
+    }
+
+    const studyWorkData = {
+      brother_name: studyWorkForm.brother_name,
+      work_title: studyWorkForm.work_title,
+      description: studyWorkForm.description,
+      category: studyWorkForm.category,
+      is_approved: studyWorkForm.is_approved ?? false,
+      file_path: studyWorkForm.file_path || 'placeholder',
+      uploaded_by: user?.id
+    };
+
+    if (editingStudyWork) {
+      const { error } = await supabase
+        .from('study_works')
+        .update(studyWorkData)
+        .eq('id', editingStudyWork);
+      
+      if (error) {
+        toast({ title: 'Erro', description: 'Falha ao atualizar trabalho', variant: 'destructive' });
+      } else {
+        toast({ title: 'Sucesso', description: 'Trabalho atualizado com sucesso' });
+        loadStudyWorks();
+        setStudyWorkDialog(false);
+        setStudyWorkForm({});
+        setEditingStudyWork(null);
+      }
+    } else {
+      const { error } = await supabase.from('study_works').insert(studyWorkData);
+      
+      if (error) {
+        toast({ title: 'Erro', description: 'Falha ao criar trabalho', variant: 'destructive' });
+      } else {
+        toast({ title: 'Sucesso', description: 'Trabalho criado com sucesso' });
+        loadStudyWorks();
+        setStudyWorkDialog(false);
+        setStudyWorkForm({});
+      }
+    }
+  };
+
+  const editStudyWork = (studyWork: StudyWork) => {
+    setStudyWorkForm(studyWork);
+    setEditingStudyWork(studyWork.id);
+    setStudyWorkDialog(true);
+  };
+
+  const deleteStudyWork = async (id: string) => {
+    if (confirm('Tem certeza que deseja excluir este trabalho?')) {
+      const { error } = await supabase.from('study_works').delete().eq('id', id);
+      
+      if (error) {
+        toast({ title: 'Erro', description: 'Falha ao excluir trabalho', variant: 'destructive' });
+      } else {
+        toast({ title: 'Sucesso', description: 'Trabalho excluído com sucesso' });
+        loadStudyWorks();
+      }
+    }
+  };
+
+  const approveStudyWork = async (id: string, approved: boolean) => {
+    const { error } = await supabase
+      .from('study_works')
+      .update({ is_approved: approved })
+      .eq('id', id);
+    
+    if (error) {
+      toast({ title: 'Erro', description: 'Falha ao atualizar status', variant: 'destructive' });
+    } else {
+      toast({ title: 'Sucesso', description: `Trabalho ${approved ? 'aprovado' : 'reprovado'} com sucesso` });
+      loadStudyWorks();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <section className="py-20 px-4 text-center bg-gradient-primary text-primary-foreground">
@@ -417,11 +529,12 @@ const CommissionCRUD: React.FC = () => {
 
       <div className="container mx-auto px-4 py-16 max-w-6xl">
         <Tabs defaultValue="events" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="events">Eventos</TabsTrigger>
             <TabsTrigger value="activities">Atividades</TabsTrigger>
             <TabsTrigger value="profiles">Perfis</TabsTrigger>
             <TabsTrigger value="masters">Mestres</TabsTrigger>
+            <TabsTrigger value="studyworks">Tempos de Estudos</TabsTrigger>
           </TabsList>
           
           {/* Events Tab */}
@@ -898,6 +1011,136 @@ const CommissionCRUD: React.FC = () => {
                               <Edit className="w-4 h-4" />
                             </Button>
                             <Button size="sm" variant="destructive" onClick={() => deleteMaster(master.id)}>
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* StudyWorks Tab */}
+          <TabsContent value="studyworks" className="space-y-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center">
+                  <BookOpen className="w-6 h-6 mr-2" />
+                  Gerenciar Tempos de Estudos
+                </CardTitle>
+                <Dialog open={studyWorkDialog} onOpenChange={setStudyWorkDialog}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => {
+                      setStudyWorkForm({});
+                      setEditingStudyWork(null);
+                    }}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Novo Trabalho
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>{editingStudyWork ? 'Editar' : 'Novo'} Trabalho de Estudo</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Nome do Irmão *</Label>
+                        <Input
+                          value={studyWorkForm.brother_name || ''}
+                          onChange={(e) => setStudyWorkForm({...studyWorkForm, brother_name: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label>Título do Trabalho *</Label>
+                        <Input
+                          value={studyWorkForm.work_title || ''}
+                          onChange={(e) => setStudyWorkForm({...studyWorkForm, work_title: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label>Categoria *</Label>
+                        <select
+                          value={studyWorkForm.category || 'geral'}
+                          onChange={(e) => setStudyWorkForm({...studyWorkForm, category: e.target.value})}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                        >
+                          <option value="geral">Geral</option>
+                          <option value="historia">História Maçônica</option>
+                          <option value="filosofia">Filosofia</option>
+                          <option value="simbolismo">Simbolismo</option>
+                          <option value="ritual">Ritual</option>
+                          <option value="outros">Outros</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label>Descrição</Label>
+                        <Textarea
+                          value={studyWorkForm.description || ''}
+                          onChange={(e) => setStudyWorkForm({...studyWorkForm, description: e.target.value})}
+                        />
+                      </div>
+                      <div>
+                        <Label>Caminho do Arquivo</Label>
+                        <Input
+                          value={studyWorkForm.file_path || ''}
+                          onChange={(e) => setStudyWorkForm({...studyWorkForm, file_path: e.target.value})}
+                          placeholder="Caminho do arquivo no storage"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Switch
+                          checked={studyWorkForm.is_approved ?? false}
+                          onCheckedChange={(checked) => setStudyWorkForm({...studyWorkForm, is_approved: checked})}
+                        />
+                        <Label>Aprovado</Label>
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button variant="outline" onClick={() => setStudyWorkDialog(false)}>
+                          Cancelar
+                        </Button>
+                        <Button onClick={saveStudyWork}>Salvar</Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome do Irmão</TableHead>
+                      <TableHead>Título</TableHead>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Data Upload</TableHead>
+                      <TableHead>Aprovado</TableHead>
+                      <TableHead>Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {studyWorks.map((work) => (
+                      <TableRow key={work.id}>
+                        <TableCell>{work.brother_name}</TableCell>
+                        <TableCell>{work.work_title}</TableCell>
+                        <TableCell>{work.category}</TableCell>
+                        <TableCell>{new Date(work.upload_date).toLocaleDateString('pt-BR')}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              checked={work.is_approved}
+                              onCheckedChange={(checked) => approveStudyWork(work.id, checked)}
+                            />
+                            <span>{work.is_approved ? 'Sim' : 'Não'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            <Button size="sm" variant="outline" onClick={() => editStudyWork(work)}>
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button size="sm" variant="destructive" onClick={() => deleteStudyWork(work.id)}>
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
