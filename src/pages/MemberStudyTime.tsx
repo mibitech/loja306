@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, Upload, Eye, Download, Calendar, User, FileText, Plus } from 'lucide-react';
+import { Loader2, Upload, Eye, Download, Calendar, User, FileText, Plus, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface StudyWork {
@@ -22,6 +23,7 @@ interface StudyWork {
   category: string;
   is_approved: boolean;
   uploaded_by: string;
+  masonic_degree: number;
 }
 
 const MemberStudyTime: React.FC = () => {
@@ -31,6 +33,8 @@ const MemberStudyTime: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [userMasonicDegree, setUserMasonicDegree] = useState<number>(1);
+  const [degreeFilter, setDegreeFilter] = useState<string>('all');
   
   // Form data
   const [brotherName, setBrotherName] = useState('');
@@ -39,18 +43,73 @@ const MemberStudyTime: React.FC = () => {
   const [category, setCategory] = useState('geral');
 
   useEffect(() => {
-    fetchStudyWorks();
+    fetchUserProfile();
   }, []);
+
+  useEffect(() => {
+    if (userMasonicDegree > 0) {
+      fetchStudyWorks();
+    }
+  }, [userMasonicDegree]);
+
+  const fetchUserProfile = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('masonic_degree')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setUserMasonicDegree(data.masonic_degree);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar perfil do usuário:', error);
+    }
+  };
 
   const fetchStudyWorks = async () => {
     try {
-      const { data, error } = await supabase
+      // Get all study works first
+      const { data: worksData, error: worksError } = await supabase
         .from('study_works')
         .select('*')
         .order('upload_date', { ascending: false });
 
-      if (error) throw error;
-      setStudyWorks(data || []);
+      if (worksError) throw worksError;
+
+      if (!worksData || worksData.length === 0) {
+        setStudyWorks([]);
+        return;
+      }
+
+      // Get masonic degrees for each uploader
+      const uploaderIds = [...new Set(worksData.map(work => work.uploaded_by))];
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, masonic_degree')
+        .in('user_id', uploaderIds);
+
+      if (profilesError) throw profilesError;
+
+      // Create a map of user_id to masonic_degree
+      const degreeMap = new Map();
+      profilesData?.forEach(profile => {
+        degreeMap.set(profile.user_id, profile.masonic_degree);
+      });
+
+      // Combine data and filter by user's masonic degree
+      const worksWithDegrees = worksData
+        .map(work => ({
+          ...work,
+          masonic_degree: degreeMap.get(work.uploaded_by) || 1
+        }))
+        .filter(work => work.masonic_degree <= userMasonicDegree);
+
+      setStudyWorks(worksWithDegrees);
     } catch (error) {
       console.error('Erro ao buscar trabalhos:', error);
       toast.error('Erro ao carregar trabalhos de estudo');
@@ -168,6 +227,20 @@ const MemberStudyTime: React.FC = () => {
       toast.error('Erro ao baixar documento');
     }
   };
+
+  const getDegreeLabel = (degree: number) => {
+    switch (degree) {
+      case 1: return 'Aprendiz';
+      case 2: return 'Companheiro';
+      case 3: return 'Mestre';
+      default: return 'Aprendiz';
+    }
+  };
+
+  const filteredStudyWorks = studyWorks.filter(work => {
+    if (degreeFilter === 'all') return true;
+    return work.masonic_degree.toString() === degreeFilter;
+  });
 
   if (loading) {
     return (
@@ -290,9 +363,35 @@ const MemberStudyTime: React.FC = () => {
           </Dialog>
         </div>
 
+        {/* Filters */}
+        <div className="mb-6">
+          <Card className="p-4">
+            <div className="flex items-center space-x-4">
+              <Filter className="w-5 h-5 text-muted-foreground" />
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="degreeFilter">Filtrar por Grau:</Label>
+                <Select value={degreeFilter} onValueChange={setDegreeFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Todos os graus" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os graus</SelectItem>
+                    <SelectItem value="1">Aprendiz (1º Grau)</SelectItem>
+                    {userMasonicDegree >= 2 && <SelectItem value="2">Companheiro (2º Grau)</SelectItem>}
+                    {userMasonicDegree >= 3 && <SelectItem value="3">Mestre (3º Grau)</SelectItem>}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Seu grau: {userMasonicDegree === 1 ? 'Aprendiz' : userMasonicDegree === 2 ? 'Companheiro' : 'Mestre'}
+              </div>
+            </div>
+          </Card>
+        </div>
+
         {/* Study Works List */}
         <div className="grid gap-6">
-          {studyWorks.length === 0 ? (
+          {filteredStudyWorks.length === 0 ? (
             <Card className="text-center py-12">
               <CardContent>
                 <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -303,7 +402,7 @@ const MemberStudyTime: React.FC = () => {
               </CardContent>
             </Card>
           ) : (
-            studyWorks.map((work) => (
+            filteredStudyWorks.map((work) => (
               <Card key={work.id} className="shadow-soft hover:shadow-elegant transition-smooth">
                 <CardHeader>
                   <div className="flex justify-between items-start">
@@ -321,6 +420,9 @@ const MemberStudyTime: React.FC = () => {
                           {new Date(work.upload_date).toLocaleDateString('pt-BR')}
                         </div>
                         <Badge variant="secondary">{work.category}</Badge>
+                        <Badge variant="outline">
+                          {work.masonic_degree === 1 ? 'Aprendiz' : work.masonic_degree === 2 ? 'Companheiro' : 'Mestre'}
+                        </Badge>
                         {work.is_approved && (
                           <Badge variant="default">Aprovado</Badge>
                         )}
