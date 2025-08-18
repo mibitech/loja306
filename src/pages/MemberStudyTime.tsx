@@ -73,11 +73,12 @@ const MemberStudyTime: React.FC = () => {
 
   const fetchStudyWorks = async () => {
     try {
-      // Get study works filtered by user's masonic degree access
+      // Get study works filtered by user's masonic degree access and only approved works
       const { data: worksData, error: worksError } = await supabase
         .from('study_works')
         .select('*')
         .lte('masonic_degree', userMasonicDegree)
+        .eq('is_approved', true)
         .order('upload_date', { ascending: false });
 
       if (worksError) throw worksError;
