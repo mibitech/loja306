@@ -62,12 +62,22 @@ const MemberStudyTime: React.FC = () => {
         .eq('user_id', user.id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao buscar perfil do usuário:', error);
+        toast.error('Erro ao carregar perfil do usuário');
+        return;
+      }
+      
       if (data) {
-        setUserMasonicDegree(data.masonic_degree);
+        setUserMasonicDegree(data.masonic_degree || 1);
+      } else {
+        console.warn('Perfil não encontrado para o usuário');
+        setUserMasonicDegree(1); // Default to Aprendiz
       }
     } catch (error) {
       console.error('Erro ao buscar perfil do usuário:', error);
+      toast.error('Erro ao carregar perfil do usuário');
+      setUserMasonicDegree(1); // Default to Aprendiz
     }
   };
 
