@@ -73,43 +73,16 @@ const MemberStudyTime: React.FC = () => {
 
   const fetchStudyWorks = async () => {
     try {
-      // Get all study works first
+      // Get study works filtered by user's masonic degree access
       const { data: worksData, error: worksError } = await supabase
         .from('study_works')
         .select('*')
+        .lte('masonic_degree', userMasonicDegree)
         .order('upload_date', { ascending: false });
 
       if (worksError) throw worksError;
 
-      if (!worksData || worksData.length === 0) {
-        setStudyWorks([]);
-        return;
-      }
-
-      // Get masonic degrees for each uploader
-      const uploaderIds = [...new Set(worksData.map(work => work.uploaded_by))];
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('user_id, masonic_degree')
-        .in('user_id', uploaderIds);
-
-      if (profilesError) throw profilesError;
-
-      // Create a map of user_id to masonic_degree
-      const degreeMap = new Map();
-      profilesData?.forEach(profile => {
-        degreeMap.set(profile.user_id, profile.masonic_degree);
-      });
-
-      // Combine data and filter by user's masonic degree
-      const worksWithDegrees = worksData
-        .map(work => ({
-          ...work,
-          masonic_degree: degreeMap.get(work.uploaded_by) || 1
-        }))
-        .filter(work => work.masonic_degree <= userMasonicDegree);
-
-      setStudyWorks(worksWithDegrees);
+      setStudyWorks(worksData || []);
     } catch (error) {
       console.error('Erro ao buscar trabalhos:', error);
       toast.error('Erro ao carregar trabalhos de estudo');
@@ -166,7 +139,8 @@ const MemberStudyTime: React.FC = () => {
           file_size: selectedFile.size,
           description,
           category,
-          uploaded_by: user.id
+          uploaded_by: user.id,
+          masonic_degree: userMasonicDegree
         });
 
       if (dbError) throw dbError;

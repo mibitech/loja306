@@ -83,6 +83,7 @@ interface StudyWork {
   category: string;
   is_approved: boolean;
   uploaded_by: string;
+  masonic_degree: number;
   created_at: string;
   updated_at: string;
 }
@@ -453,7 +454,8 @@ const CommissionCRUD: React.FC = () => {
       category: studyWorkForm.category,
       is_approved: studyWorkForm.is_approved ?? false,
       file_path: studyWorkForm.file_path || 'placeholder',
-      uploaded_by: user?.id
+      uploaded_by: user?.id,
+      masonic_degree: studyWorkForm.masonic_degree || 1
     };
 
     if (editingStudyWork) {
